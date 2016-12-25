@@ -95,4 +95,6 @@ io.on('connection', function (socket) {
         socket.join('trade-history');
         socket.emit('trade-history', 'initial', data.tradeHistory);
     });
+
+    socket.on('disconnect', () => console.log('Client disconnected'));
 });
