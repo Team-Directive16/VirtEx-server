@@ -12,7 +12,7 @@ class Trade {
         this.quantity = quantity;
         this.aggressor = aggressor;
 
-        this.created = Date.now();
+        this.created = -1 * Date.now(); // -1 simmplified sorting in reversed order
 
         Object.freeze(this); // immutable
     }
