@@ -1,7 +1,28 @@
 'use strict';
 
+// Initialize Firebase
+let config = {};
+if (process.env.NODE_ENV === 'PRODUCTION') {
+    config.apiKey = process.env.apiKey;
+    config.authDomain = process.env.authDomain;
+    config.databaseURL = process.env.databaseURL;
+    config.storageBucket = process.env.storageBucket;
+    config.messagingSenderId = process.env.messagingSenderId;
+} else {
+    config = require('../virtex-firebase-service-account');
+}
+
+let firebase = require('firebase').initializeApp(config);
+let ref = firebase.database().ref();
+let tradesRef = ref.child('trade-history');
+
 let app = require('http').createServer();
 let io = require('socket.io')(app);
+
+const port = process.env.PORT || 8081;
+app.listen(port, () => {
+    console.log(`server listening on port:${port}`);
+});
 
 let Order = require('./order/order');
 let AggregatedOrderBook = require('./order-book/aggregated');
@@ -17,11 +38,6 @@ let data = {
     privateOrderBook: new PrivateOrderBooks(),
     tradeHistory: []
 };
-
-const port = process.env.PORT || 8081;
-app.listen(port, () => {
-    console.log(`server listening on port:${port}`);
-});
 
 matcher.on('new-trade', function (trade) {
     data.tradeHistory.unshift(trade);
