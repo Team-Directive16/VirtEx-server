@@ -1,5 +1,7 @@
+# Ignore folders
+/json-trades-and-orders
 
-# Ignore file with connection strings for DB
+# Ignore files
 # /config/connection-strings.js
 
 # Logs
@@ -40,3 +42,4 @@ bower_components
 
 # Optional REPL history
 .node_repl_history
+virtex-firebase-service-account.js
