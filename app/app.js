@@ -36,12 +36,24 @@ let data = {
     bidAggregatedOrderBook: new AggregatedOrderBook(),
     askAggregatedOrderBook: new AggregatedOrderBook(),
     privateOrderBook: new PrivateOrderBooks(),
-    tradeHistory: []
+    tradeHistory: {}
 };
 
+let lastTrade = {};
+tradesRef.orderByKey()
+    .limitToLast(1)
+    .on('child_added', function (snapshot) {
+        lastTrade = snapshot.val();
+        // lastTrade = {};
+        // lastTrade[snapshot.key] = snapshot.val();
+        // console.log('3: ', lastTrade);
+    });
+
 matcher.on('new-trade', function (trade) {
-    data.tradeHistory.unshift(trade);
-    io.to('trade-history').emit('trade-history', 'new', trade);
+    console.log('matcher: new trade', trade);
+
+    let tradeRef = tradesRef.push(trade);
+    io.to('trade-history').emit('trade-history', 'new', lastTrade);
 });
 
 matcher.on('new-order', function (order) {
@@ -78,6 +90,19 @@ matcher.on('partially-matched-order', function (newOrder, oldOrder, matchedQuant
 
 io.on('connection', function (socket) {
     console.log('new connection', socket.id);
+
+    tradesRef.orderByChild('created')
+        .limitToFirst(20)
+        .once('value', function (snap) {
+            let result = [];
+            snap.forEach(function (childSnapshot) {
+                result.push(childSnapshot.val());
+                // console.log(childSnapshot.val());
+            });
+
+            data.tradeHistory = result;
+            // console.log('1: ', JSON.stringify(data.tradeHistory));
+        });
 
     socket.on('order', function (order) {
 
